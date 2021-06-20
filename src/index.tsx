@@ -1,9 +1,8 @@
 import {createMuiTheme, CssBaseline, ThemeProvider} from '@material-ui/core';
 import ReactDOM from 'react-dom';
-import {BrowserRouter, Route, Switch} from "react-router-dom";
 import React from "react";
-import UserList from "./user/user-list";
-import UserEdit from "./user/user-edit";
+import 'react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css';
+import App from "./pages/_app";
 
 /**
  * Customize form so each control has more space
@@ -21,16 +20,7 @@ const theme = createMuiTheme({
 ReactDOM.render(
 	<ThemeProvider theme={theme}>
 		<CssBaseline/>
-		<BrowserRouter>
-				<Switch>
-					<Route path="/users/edit">
-						<UserEdit/>
-					</Route>
-					<Route path="/users">
-						<UserList/>
-					</Route>
-				</Switch>
-		</BrowserRouter>
+		<App/>
 	</ThemeProvider>,
 	document.getElementById('root')
 );

@@ -18,9 +18,9 @@ Let's briefly have a look at the most important files:
 - `src/index.tsx` is the entry point of the application. We also customize the Material UI theme to give each control more space.
 - `src/App.tsx` is the main app component and makes use of the `JsonForms` component in order to render a form.
 
-The [data schema](src/schema.json) defines the structure of a Task: it contains attributes such as title, description, due date and so on.
+The [data schema](src/pages/sample/schema.json) defines the structure of a Task: it contains attributes such as title, description, due date and so on.
 
-The [corresponding UI schema](src/uischema.json) specifies controls for each property and puts them into a vertical layout that in turn contains two horizontal layouts.
+The [corresponding UI schema](src/pages/sample/uischema.json) specifies controls for each property and puts them into a vertical layout that in turn contains two horizontal layouts.
 
 ## Rendering JSON Forms
 

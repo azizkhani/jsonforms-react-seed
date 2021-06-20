@@ -5,14 +5,14 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import logo from './logo.svg';
 import './App.css';
-import schema from './schema.json';
-import uischema from './uischema.json';
+import schema from './pages/sample/schema.json';
+import uischema from './pages/sample/uischema.json';
 import {
   materialCells,
   materialRenderers,
 } from '@jsonforms/material-renderers';
-import RatingControl from './RatingControl';
-import ratingControlTester from './ratingControlTester';
+import RatingControl from './pages/sample/RatingControl';
+import ratingControlTester from './pages/sample/ratingControlTester';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((_theme) => ({

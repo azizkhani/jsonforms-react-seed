@@ -8,7 +8,9 @@ import schema from "./schema.json";
 import uischema from "./uischema.json";
 import {Button} from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
-import {Link} from "react-router-dom";
+import {Link, RouteComponentProps} from "react-router-dom";
+import axios from 'axios';
+import {ICrudGetAction} from "../../util/redux-action.type";
 
 const useStyles = makeStyles((_theme) => ({
 	margin: {
@@ -25,6 +27,17 @@ const initialData: IUser = defaultValue;
 const renderers = [
 	...materialRenderers,
 ];
+
+
+/*export const getEntity: ICrudGetAction<IUser> = id => {
+	const requestUrl = `users/${id}`;
+	return {
+		payload: axios.get<IUser>(requestUrl),
+	};
+};*/
+
+export interface IUserDetailProps extends RouteComponentProps<{ id: string }> {
+}
 
 const UserEdit = () => {
 	const classes = useStyles();
@@ -57,7 +70,7 @@ const UserEdit = () => {
 				<Grid item sm={12} justify={'center'}>
 					<div>
 						<Button color="primary" size="small" variant="outlined" startIcon={<SaveIcon/>}
-										className={classes.margin}>Edit</Button>
+										className={classes.margin}>Save</Button>
 						<Button color="primary" size="small" variant="outlined" startIcon={<SaveIcon/>}
 										className={classes.margin} component={Link} to={'/users'}>Return</Button>
 					</div>
