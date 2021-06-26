@@ -3,18 +3,18 @@
   "elements": [
     {
       "type": "Control",
-      "scope": "#/properties/login"
+      "scope": "#/properties/id"
     },
     {
       "type": "HorizontalLayout",
       "elements": [
         {
           "type": "Control",
-          "scope": "#/properties/firstName"
+          "scope": "#/properties/username"
         },
         {
           "type": "Control",
-          "scope": "#/properties/lastName"
+          "scope": "#/properties/name"
         }
       ]
     }

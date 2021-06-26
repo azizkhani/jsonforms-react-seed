@@ -1,17 +1,17 @@
 {
   "type": "object",
   "properties": {
-    "login": {
+    "id": {
       "title": "login",
       "type": "string",
       "minLength": 1
     },
-    "firstName": {
-      "title": "firstname",
+    "username": {
+      "title": "username",
       "type": "string"
     },
-    "lastName": {
-      "title": "lastname",
+    "name": {
+      "title": "name",
       "type": "string"
     }
   },
