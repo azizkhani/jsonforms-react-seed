@@ -55,7 +55,6 @@ export interface IUserProps extends StateProps, DispatchProps, RouteComponentPro
 
 const UserList = (props: IUserProps) => {
 	const classes = useStyles();
-	const [users, setUsers] = useState<IUser[]>(initialData);
 
 	useEffect(() => {
 		props.getEntities();

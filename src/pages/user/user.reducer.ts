@@ -10,9 +10,11 @@ import {
   REQUEST,
   SUCCESS,
 } from '../../shared/reducer/action-type.util';
+import { cleanEntity } from '../../shared/util/entity-utils';
 import { defaultValue, IUser } from './user.model';
 
 const apiUrl = 'api/user';
+
 export const ACTION_TYPES = {
   FETCH_USER_LIST: 'user/FETCH_USER_LIST',
   FETCH_USER: 'user/FETCH_USER',
@@ -111,4 +113,55 @@ export default (state: UserState = initialState, action): UserState => {
 export const getEntities: ICrudGetAllAction<IUser> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_USER_LIST,
   payload: axios.get<IUser>(`${apiUrl}`),
+});
+
+export const getEntity: ICrudGetAction<IUser> = (id) => {
+  const requestUrl = `${apiUrl}/${id}`;
+  return {
+    type: ACTION_TYPES.FETCH_USER,
+    payload: axios.get<IUser>(requestUrl),
+  };
+};
+
+export const createEntity: ICrudPutAction<IUser> =
+  (entity) => async (dispatch) => {
+    const result = await dispatch({
+      type: ACTION_TYPES.CREATE_USER,
+      payload: axios.post(apiUrl, cleanEntity(entity)),
+    });
+    dispatch(getEntities());
+    return result;
+  };
+
+export const updateEntity: ICrudPutAction<IUser> =
+  (entity) => async (dispatch) => {
+    const result = await dispatch({
+      type: ACTION_TYPES.UPDATE_USER,
+      payload: axios.put(`${apiUrl}/${entity.id}`, cleanEntity(entity)),
+    });
+    return result;
+  };
+
+export const partialUpdate: ICrudPutAction<IUser> =
+  (entity) => async (dispatch) => {
+    const result = await dispatch({
+      type: ACTION_TYPES.PARTIAL_UPDATE_USER,
+      payload: axios.patch(`${apiUrl}/${entity.id}`, cleanEntity(entity)),
+    });
+    return result;
+  };
+
+export const deleteEntity: ICrudDeleteAction<IUser> =
+  (id) => async (dispatch) => {
+    const requestUrl = `${apiUrl}/${id}`;
+    const result = await dispatch({
+      type: ACTION_TYPES.DELETE_USER,
+      payload: axios.delete(requestUrl),
+    });
+    dispatch(getEntities());
+    return result;
+  };
+
+export const reset = () => ({
+  type: ACTION_TYPES.RESET,
 });
