@@ -22,7 +22,10 @@ const composedMiddlewares = (middlewares) =>
         applyMiddleware(...defaultMiddlewares, ...middlewares),
         DevTools.instrument()
       )
-    : compose(applyMiddleware(...defaultMiddlewares, ...middlewares));
+    : compose(
+        applyMiddleware(...defaultMiddlewares, ...middlewares),
+        DevTools.instrument()
+      );
 
 const initialize = (initialState?: IRootState, middlewares = []) =>
   createStore(reducer, initialState, composedMiddlewares(middlewares));

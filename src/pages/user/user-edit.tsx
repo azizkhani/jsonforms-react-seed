@@ -8,10 +8,12 @@ import schema from "./schema.json";
 import uischema from "./uischema.json";
 import { Button } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Link, RouteComponentProps, useLocation } from "react-router-dom";
 import { IRootState } from '../../shared/reducer';
 import { connect } from 'react-redux';
-import { getEntity, updateEntity, reset } from './user.reducer';
+import { getEntity, updateEntity, reset, createEntity } from './user.reducer';
+import Save from '@material-ui/icons/Save';
 
 const useStyles = makeStyles((_theme) => ({
 	margin: {
@@ -39,14 +41,23 @@ const UserEdit = (props: IUserDetailProps) => {
 
 	const [isNew] = useState(!props.match.params || !props.match.params.id);
 	const [user, setUser] = useState<IUser>(location.state);
+	const [entity, setEntity] = useState<IUser>(props.entity);
 
 	useEffect(() => {
-		props.getEntity(props.match.params.id);
+		if (!isNew)
+			props.getEntity(props.match.params.id);
 	}, []);
+
+	const saveEntity = () => {
+		if (isNew)
+			props.createEntity(entity);
+		else
+			props.updateEntity(entity);
+	}
 
 
 	return (
-		<Fragment>
+		< Fragment >
 			<Grid
 				container
 				justify={'center'}
@@ -55,25 +66,32 @@ const UserEdit = (props: IUserDetailProps) => {
 			>
 				<Grid item sm={4}>
 					<div>
-						<JsonForms
-							schema={schema}
-							uischema={uischema}
-							data={user}
-							renderers={renderers}
-							cells={materialCells}
-						/>
+						{props.loading ? (
+							<p>Loading...</p>
+						) : (
+							< JsonForms
+								schema={schema}
+								uischema={uischema}
+								data={props.entity}
+								renderers={renderers}
+								cells={materialCells}
+								onChange={({ data, errors }) => setEntity(data)}
+							/>
+						)
+						}
+
 					</div>
 				</Grid>
 				<Grid item sm={12} container justify={'center'}>
 					<div>
 						<Button color="primary" size="small" variant="outlined" startIcon={<SaveIcon />}
-							className={classes.margin}>Save</Button>
-						<Button color="primary" size="small" variant="outlined" startIcon={<SaveIcon />}
+							className={classes.margin} onClick={(e) => { saveEntity() }}>Save</Button>
+						<Button color="primary" size="small" variant="outlined" startIcon={<ArrowBackIcon />}
 							className={classes.margin} component={Link} to={'/users'}>Return</Button>
 					</div>
 				</Grid>
 			</Grid>
-		</Fragment>
+		</Fragment >
 	);
 };
 
@@ -86,6 +104,7 @@ const mapStateToProps = ({ user }: IRootState) => ({
 const mapDispatchToProps = {
 	getEntity,
 	updateEntity,
+	createEntity,
 	reset
 };
 

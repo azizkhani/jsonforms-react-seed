@@ -1,19 +1,20 @@
 import axios from 'axios';
-import {
-  ICrudGetAction,
-  ICrudGetAllAction,
-  ICrudPutAction,
-  ICrudDeleteAction,
-} from 'react-jhipster';
+
 import {
   FAILURE,
   REQUEST,
   SUCCESS,
 } from '../../shared/reducer/action-type.util';
 import { cleanEntity } from '../../shared/util/entity-utils';
+import {
+  ICrudDeleteAction,
+  ICrudGetAction,
+  ICrudGetAllAction,
+  ICrudPutAction,
+} from '../../util/redux-action.type';
 import { defaultValue, IUser } from './user.model';
 
-const apiUrl = 'api/user';
+const apiUrl = '/api/users';
 
 export const ACTION_TYPES = {
   FETCH_USER_LIST: 'user/FETCH_USER_LIST',
@@ -21,7 +22,7 @@ export const ACTION_TYPES = {
   CREATE_USER: 'user/CREATE_USER',
   UPDATE_USER: 'user/UPDATE_USER',
   PARTIAL_UPDATE_USER: 'user/PARTIAL_UPDATE_USER',
-  DELETE_USER: 'labuserel/DELETE_USER',
+  DELETE_USER: 'user/DELETE_USER',
   RESET: 'user/RESET',
 };
 
@@ -123,6 +124,15 @@ export const getEntity: ICrudGetAction<IUser> = (id) => {
   };
 };
 
+export const setEntity = (entity: IUser) => {
+  return {
+    type: SUCCESS(ACTION_TYPES.FETCH_USER),
+    payload: {
+      data: entity,
+    },
+  };
+};
+
 export const createEntity: ICrudPutAction<IUser> =
   (entity) => async (dispatch) => {
     const result = await dispatch({
@@ -137,8 +147,9 @@ export const updateEntity: ICrudPutAction<IUser> =
   (entity) => async (dispatch) => {
     const result = await dispatch({
       type: ACTION_TYPES.UPDATE_USER,
-      payload: axios.put(`${apiUrl}/${entity.id}`, cleanEntity(entity)),
+      payload: axios.put(`${apiUrl}/${entity?.id}`, cleanEntity(entity)),
     });
+    dispatch(getEntities());
     return result;
   };
 
@@ -146,7 +157,7 @@ export const partialUpdate: ICrudPutAction<IUser> =
   (entity) => async (dispatch) => {
     const result = await dispatch({
       type: ACTION_TYPES.PARTIAL_UPDATE_USER,
-      payload: axios.patch(`${apiUrl}/${entity.id}`, cleanEntity(entity)),
+      payload: axios.patch(`${apiUrl}/${entity?.id}`, cleanEntity(entity)),
     });
     return result;
   };

@@ -2,19 +2,21 @@ import { Fragment, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { materialCells, materialRenderers, } from '@jsonforms/material-renderers';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Table, TableBody, TableCell, TableHead, TableRow } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow } from "@material-ui/core";
 import { defaultValue, IUser } from "./user.model";
 import SaveIcon from '@material-ui/icons/Save';
 import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AddIcon from '@material-ui/icons/Add';
 import { Link, RouteComponentProps } from "react-router-dom";
 import schema from "./schema.json";
 import uischema from "./uischema-search.json";
 import { JsonForms } from "@jsonforms/react";
-import { getEntities } from './user.reducer';
+import { getEntities, deleteEntity } from './user.reducer';
 import { IRootState } from '../../shared/reducer';
 import { connect } from 'react-redux';
+import React from 'react';
 
 const useStyles = makeStyles((_theme) => ({
 	margin: {
@@ -55,6 +57,8 @@ export interface IUserProps extends StateProps, DispatchProps, RouteComponentPro
 
 const UserList = (props: IUserProps) => {
 	const classes = useStyles();
+	const [open, setOpen] = React.useState(false);
+	const [selectedId, setSelectedId] = React.useState("");
 
 	useEffect(() => {
 		props.getEntities();
@@ -65,6 +69,20 @@ const UserList = (props: IUserProps) => {
 			pathname: `/users/${user.id}/edit`,
 			state: user
 		})
+	};
+
+	const handleClickOpen = (id) => {
+		setSelectedId(id);
+		setOpen(true);
+	};
+
+	const handleClose = () => {
+		setOpen(false);
+	};
+
+	const handleDelete = () => {
+		props.deleteEntity(selectedId);
+		setOpen(false);
 	};
 
 	return (
@@ -89,6 +107,8 @@ const UserList = (props: IUserProps) => {
 						className={classes.margin}>Search</Button>
 					<Button color="primary" size="small" variant="outlined" startIcon={<ClearIcon />}
 						className={classes.margin} component={Link} to={'/users'}>Clear</Button>
+					<Button color="primary" size="small" variant="outlined" startIcon={<AddIcon />}
+						className={classes.margin} component={Link} to={'/users/create'}>Create</Button>
 				</Grid>
 				<Grid item sm={12}>
 					<div>
@@ -123,7 +143,7 @@ const UserList = (props: IUserProps) => {
 													startIcon={<SaveIcon />}
 													className={classes.margin} onClick={(e) => navigateToEdit(user)}>Edit</Button>
 												<Button color="secondary" size="small" startIcon={<DeleteIcon />}
-													variant="outlined">Delete</Button>
+													variant="outlined" onClick={(e) => handleClickOpen(user?.id)}>Delete</Button>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -133,7 +153,29 @@ const UserList = (props: IUserProps) => {
 					</div>
 				</Grid>
 			</Grid>
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">{"Are u sure?"}</DialogTitle>
+				<DialogContent>
+					<DialogContentText id="alert-dialog-description">
+						After delete record you can not revert
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleClose} color="secondary">
+						Disagree
+					</Button>
+					<Button onClick={handleDelete} color="primary" autoFocus>
+						Agree
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Fragment>
+
 	);
 };
 
@@ -145,6 +187,7 @@ const mapStateToProps = ({ user }: IRootState) => ({
 
 const mapDispatchToProps = {
 	getEntities,
+	deleteEntity
 };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
