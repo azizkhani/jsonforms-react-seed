@@ -2,18 +2,40 @@
   "type": "object",
   "properties": {
     "id": {
-      "title": "login",
-      "type": "string",
-      "minLength": 1
+      "title": "id",
+      "type": "string"
     },
     "username": {
       "title": "username",
       "type": "string"
     },
+    "email": {
+      "title": "email",
+      "type": "string"
+    },
     "name": {
       "title": "name",
       "type": "string"
+    },
+    "activated": {
+      "title": "activated",
+      "type": "boolean"
+    },
+    "password": {
+      "title": "password",
+      "type": "string"
+    },
+    "confirmPassword": {
+      "title": "confirmPassword",
+      "type": "string"
     }
   },
-  "required": ["login", "firstName"]
+  "required": [
+    "username",
+    "name",
+    "email",
+    "password",
+    "confirmPassword",
+    "activated"
+  ]
 }

@@ -3,7 +3,7 @@
   "elements": [
     {
       "type": "Control",
-      "scope": "#/properties/id"
+      "scope": "#/properties/email"
     },
     {
       "type": "Control",

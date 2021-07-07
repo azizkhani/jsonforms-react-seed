@@ -1,111 +1,121 @@
 import { Fragment, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { materialCells, materialRenderers, } from '@jsonforms/material-renderers';
+import { materialCells, materialRenderers } from '@jsonforms/material-renderers';
 import { makeStyles } from '@material-ui/core/styles';
-import { defaultValue, IUser } from "./user.model";
-import { JsonForms } from "@jsonforms/react";
-import schema from "./schema.json";
-import uischema from "./uischema.json";
-import { Button } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { Link, RouteComponentProps, useLocation } from "react-router-dom";
+import { defaultValue, IUser } from '../../shared/model/user.model';
+import { JsonForms } from '@jsonforms/react';
+import schema from './schema.json';
+import uischema from './uischema.json';
+import { Button } from '@material-ui/core';
+import SaveIcon from '@material-ui/icons/Save';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { RouteComponentProps, useLocation } from 'react-router-dom';
 import { IRootState } from '../../shared/reducer';
 import { connect } from 'react-redux';
-import { getEntity, updateEntity, reset, createEntity } from './user.reducer';
-import Save from '@material-ui/icons/Save';
+import { getEntity, updateEntity, reset, createEntity } from '../../state/user.reducer';
 
 const useStyles = makeStyles((_theme) => ({
-	margin: {
-		margin: _theme.spacing(1),
-	},
-	container: {
-		padding: '1em',
-		width: '100%',
-	}
+  margin: {
+    margin: _theme.spacing(1),
+  },
+  container: {
+    padding: '1em',
+    width: '100%',
+  },
 }));
 
 const initialData: IUser = defaultValue;
 
-const renderers = [
-	...materialRenderers,
-];
+const renderers = [...materialRenderers];
 
-
-export interface IUserDetailProps extends StateProps, DispatchProps, RouteComponentProps<{ id: string }> {
-}
+export interface IUserDetailProps extends StateProps, DispatchProps, RouteComponentProps<{ id: string }> {}
 
 const UserEdit = (props: IUserDetailProps) => {
-	const classes = useStyles();
-	const location = useLocation<IUser>();
+  const classes = useStyles();
+  const location = useLocation<IUser>();
 
-	const [isNew] = useState(!props.match.params || !props.match.params.id);
-	const [user, setUser] = useState<IUser>(location.state);
-	const [entity, setEntity] = useState<IUser>(props.entity);
+  const [isNew] = useState(!props.match.params || !props.match.params.id);
+  const [user, setUser] = useState<IUser>(location.state);
+  const [entity, setEntity] = useState<IUser>(props.entity);
 
-	useEffect(() => {
-		if (!isNew)
-			props.getEntity(props.match.params.id);
-	}, []);
+  useEffect(() => {
+    if (!isNew) props.getEntity(props.match.params.id);
+  }, []);
 
-	const saveEntity = () => {
-		if (isNew)
-			props.createEntity(entity);
-		else
-			props.updateEntity(entity);
-	}
+  const handleSaveEntity = () => {
+    if (isNew) props.createEntity(entity);
+    else props.updateEntity(entity);
+  };
 
+  const handleReturn = () => {
+    props.reset();
+    props.history.push({
+      pathname: `/users`,
+    });
+  };
 
-	return (
-		< Fragment >
-			<Grid
-				container
-				justify={'center'}
-				spacing={1}
-				className={classes.container}
-			>
-				<Grid item sm={4}>
-					<div>
-						{props.loading ? (
-							<p>Loading...</p>
-						) : (
-							< JsonForms
-								schema={schema}
-								uischema={uischema}
-								data={props.entity}
-								renderers={renderers}
-								cells={materialCells}
-								onChange={({ data, errors }) => setEntity(data)}
-							/>
-						)
-						}
-
-					</div>
-				</Grid>
-				<Grid item sm={12} container justify={'center'}>
-					<div>
-						<Button color="primary" size="small" variant="outlined" startIcon={<SaveIcon />}
-							className={classes.margin} onClick={(e) => { saveEntity() }}>Save</Button>
-						<Button color="primary" size="small" variant="outlined" startIcon={<ArrowBackIcon />}
-							className={classes.margin} component={Link} to={'/users'}>Return</Button>
-					</div>
-				</Grid>
-			</Grid>
-		</Fragment >
-	);
+  return (
+    <Fragment>
+      <Grid container justify={'center'} spacing={1} className={classes.container}>
+        <Grid item sm={4}>
+          <div>
+            {props.loading ? (
+              <p>Loading...</p>
+            ) : (
+              <JsonForms
+                schema={schema}
+                uischema={uischema}
+                data={props.entity}
+                renderers={renderers}
+                cells={materialCells}
+                onChange={({ data, errors }) => setEntity(data)}
+              />
+            )}
+          </div>
+        </Grid>
+        <Grid item sm={12} container justify={'center'}>
+          <div>
+            <Button
+              color='primary'
+              size='small'
+              variant='outlined'
+              startIcon={<ArrowBackIcon />}
+              className={classes.margin}
+              onClick={(e) => {
+                handleReturn();
+              }}
+            >
+              Return
+            </Button>
+            <Button
+              color='primary'
+              size='small'
+              variant='outlined'
+              startIcon={<SaveIcon />}
+              className={classes.margin}
+              onClick={(e) => {
+                handleSaveEntity();
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </Grid>
+      </Grid>
+    </Fragment>
+  );
 };
 
-
 const mapStateToProps = ({ user }: IRootState) => ({
-	entity: user.entity,
-	loading: user.loading,
+  entity: user.entity,
+  loading: user.loading,
 });
 
 const mapDispatchToProps = {
-	getEntity,
-	updateEntity,
-	createEntity,
-	reset
+  getEntity,
+  updateEntity,
+  createEntity,
+  reset,
 };
 
 type StateProps = ReturnType<typeof mapStateToProps>;

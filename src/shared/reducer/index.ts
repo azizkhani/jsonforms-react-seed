@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { loadingBarReducer as loadingBar } from 'react-redux-loading-bar';
-import user, { UserState } from '../../pages/user/user.reducer';
+import user, { UserState } from '../../state/user.reducer';
 
 export interface IRootState {
   user: UserState;

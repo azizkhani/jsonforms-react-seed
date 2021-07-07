@@ -29,11 +29,13 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import schema from './schema.json';
 import uischema from './uischema-search.json';
 import { JsonForms } from '@jsonforms/react';
-import { getEntities, deleteEntity, resetSearch, reset } from '../../state/user.reducer';
+import { deleteEntity, reset, buildURLQuery, apiUserUrl } from '../../state/user.reducer';
 import { IRootState } from '../../shared/reducer';
 import { connect } from 'react-redux';
 import Pagination from '@material-ui/lab/Pagination';
 import { ITEMS_PER_PAGE } from '../../shared/util/pagination.constants';
+import { useQuery, useQueryClient } from 'react-query';
+import axios from 'axios';
 
 const useStyles = makeStyles((_theme) => ({
   margin: {
@@ -64,6 +66,13 @@ const useStyles = makeStyles((_theme) => ({
   },
 }));
 
+type PaginationParam = {
+  itemsPerPage: number;
+  sort: string;
+  order: string;
+  activePage: number;
+};
+
 const initialPagaination = {
   itemsPerPage: ITEMS_PER_PAGE,
   sort: 'id',
@@ -79,29 +88,35 @@ export interface IUserProps
       url: string;
     }> {}
 
-const UserList = (props: IUserProps) => {
-  const { loading, userList, totalPages } = props;
-
+async function fetchProjects(params: any) {
+  const [, { entity }, { pagination }] = params.queryKey;
+  const requestUrl = `${apiUserUrl}${
+    pagination && pagination.sort
+      ? `?page=${pagination.activePage}&size=${pagination.itemsPerPage}&sort=${pagination.sort}&${buildURLQuery(entity)}`
+      : ''
+  }`;
+  const { data } = await axios.get(requestUrl);
+  return data;
+}
+const UserListQuery = (props: IUserProps) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState('');
-  const [pagination, setPagination] = useState(initialPagaination);
+  const [selectedId, setSelectedId] = useState<string>('');
+  const [pagination, setPagination] = useState<PaginationParam>(initialPagaination);
   const [entity, setEntity] = useState<IUser>(props.userSearch);
 
-  useEffect(() => {
-    getUsersFromProps();
-  }, [entity, pagination.activePage, pagination.order, pagination.sort]);
+  const { status, data, error, isFetching } = useQuery(['users', { entity }, { pagination }], fetchProjects, {
+    keepPreviousData: true,
+  });
 
   const navigateToEdit = (user: IUser) => {
     props.history.push({
-      pathname: `/users/${user.id}/edit`,
+      pathname: `/users/${user.id}/new-edit`,
       state: user,
     });
   };
 
-  const getUsersFromProps = () => {
-    props.getEntities(entity, pagination.activePage, pagination.itemsPerPage, `${pagination.sort},${pagination.order}`);
-  };
+  const getUsersFromProps = () => {};
 
   const handleClickOpen = (id) => {
     setSelectedId(id);
@@ -125,7 +140,6 @@ const UserList = (props: IUserProps) => {
     });
 
   const handlePagination = (event, value) => {
-    console.log(value);
     setPagination({
       ...pagination,
       activePage: value - 1,
@@ -139,6 +153,9 @@ const UserList = (props: IUserProps) => {
   const handleClearSearch = () => {
     setEntity({});
   };
+  if (status === 'loading') {
+    return <div>...</div>;
+  }
 
   return (
     <Fragment>
@@ -181,7 +198,7 @@ const UserList = (props: IUserProps) => {
             startIcon={<AddIcon />}
             className={classes.margin}
             component={Link}
-            to={'/users/create'}
+            to={'/users/new-create'}
           >
             Create
           </Button>
@@ -212,54 +229,56 @@ const UserList = (props: IUserProps) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {userList.map((user, i) => (
-                  <TableRow key={`entity-${i}`}>
-                    <TableCell>{i}</TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      {user.activated ? (
-                        <CheckBoxIcon fontSize='small' color='secondary'></CheckBoxIcon>
-                      ) : (
-                        <CheckBoxOutlineBlankIcon fontSize='small' color='secondary'></CheckBoxOutlineBlankIcon>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <Button
-                          color='primary'
-                          size='small'
-                          variant='outlined'
-                          startIcon={<SaveIcon />}
-                          className={classes.margin}
-                          onClick={(e) => navigateToEdit(user)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          color='secondary'
-                          size='small'
-                          startIcon={<DeleteIcon />}
-                          variant='outlined'
-                          onClick={(e) => handleClickOpen(user?.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {data &&
+                  data.content.map((user, i) => (
+                    <TableRow key={`entity-${i}`}>
+                      <TableCell>{i}</TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        {user.activated ? (
+                          <CheckBoxIcon fontSize='small' color='secondary'></CheckBoxIcon>
+                        ) : (
+                          <CheckBoxOutlineBlankIcon fontSize='small' color='secondary'></CheckBoxOutlineBlankIcon>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <Button
+                            color='primary'
+                            size='small'
+                            variant='outlined'
+                            startIcon={<SaveIcon />}
+                            className={classes.margin}
+                            onClick={(e) => navigateToEdit(user)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            color='secondary'
+                            size='small'
+                            startIcon={<DeleteIcon />}
+                            variant='outlined'
+                            onClick={(e) => handleClickOpen(user?.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </div>
         </Grid>
         <Grid item sm={12}>
-          {totalPages > 0 ? (
-            <Pagination count={totalPages} variant='outlined' onChange={handlePagination} showFirstButton showLastButton />
+          {data && data.totalPages > 0 ? (
+            <Pagination count={data.totalPages} variant='outlined' onChange={handlePagination} showFirstButton showLastButton />
           ) : (
             <Typography>User list is empty</Typography>
           )}
+          {isFetching ? <span>Loading...</span> : null}
         </Grid>
       </Grid>
       <Dialog open={open} onClose={handleClose} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
@@ -283,18 +302,14 @@ const UserList = (props: IUserProps) => {
 const mapStateToProps = ({ user }: IRootState) => ({
   userList: user.entities,
   userSearch: user.entity,
-  loading: user.loading,
-  totalPages: user.totalPages,
 });
 
 const mapDispatchToProps = {
-  getEntities,
   deleteEntity,
   reset,
-  resetSearch,
 };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserList);
+export default connect(mapStateToProps, mapDispatchToProps)(UserListQuery);

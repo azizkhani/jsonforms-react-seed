@@ -3,7 +3,7 @@
   "elements": [
     {
       "type": "Control",
-      "scope": "#/properties/id"
+      "scope": "#/properties/email"
     },
     {
       "type": "HorizontalLayout",
@@ -15,6 +15,28 @@
         {
           "type": "Control",
           "scope": "#/properties/name"
+        }
+      ]
+    },
+    {
+      "type": "HorizontalLayout",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/password"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/confirmPassword"
+        }
+      ]
+    },
+    {
+      "type": "HorizontalLayout",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/activated"
         }
       ]
     }

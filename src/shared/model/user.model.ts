@@ -1,35 +1,27 @@
 export interface IUser {
-  id?: string;
-  login?: string;
+  id?: string | null;
   name?: string;
   username?: string;
-  firstName?: string;
-  lastName?: string;
   email?: string;
-  activated?: boolean;
-  langKey?: string;
-  authorities?: any[];
+  activated?: boolean | null;
   createdBy?: string;
   createdDate?: Date | null;
   lastModifiedBy?: string;
   lastModifiedDate?: Date | null;
   password?: string;
+  confirmPassword?: string;
 }
 
 export const defaultValue: Readonly<IUser> = {
-  id: '',
-  login: '',
+  id: null,
   name: '',
   username: '',
-  firstName: '',
-  lastName: '',
   email: '',
-  activated: true,
-  langKey: '',
-  authorities: [],
+  activated: null,
   createdBy: '',
   createdDate: null,
   lastModifiedBy: '',
   lastModifiedDate: null,
   password: '',
+  confirmPassword: '',
 };

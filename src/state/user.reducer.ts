@@ -1,20 +1,12 @@
 import axios from 'axios';
+import { URLSearchParams } from 'url';
 
-import {
-  FAILURE,
-  REQUEST,
-  SUCCESS,
-} from '../../shared/reducer/action-type.util';
-import { cleanEntity } from '../../shared/util/entity-utils';
-import {
-  ICrudDeleteAction,
-  ICrudGetAction,
-  ICrudGetAllAction,
-  ICrudPutAction,
-} from '../../util/redux-action.type';
-import { defaultValue, IUser } from './user.model';
+import { FAILURE, REQUEST, SUCCESS } from '../shared/reducer/action-type.util';
+import { cleanEntity } from '../shared/util/entity-utils';
+import { ICrudDeleteAction, ICrudGetAction, ICrudGetAllActionBySearch, ICrudPutAction } from '../util/redux-action.type';
+import { defaultValue, IUser } from '../shared/model/user.model';
 
-const apiUrl = '/api/users';
+export const apiUserUrl = '/api/users';
 
 export const ACTION_TYPES = {
   FETCH_USER_LIST: 'user/FETCH_USER_LIST',
@@ -24,6 +16,7 @@ export const ACTION_TYPES = {
   PARTIAL_UPDATE_USER: 'user/PARTIAL_UPDATE_USER',
   DELETE_USER: 'user/DELETE_USER',
   RESET: 'user/RESET',
+  RESET_SEARCH_USER: 'user/RESET_SEARCH',
 };
 
 const initialState = {
@@ -33,6 +26,7 @@ const initialState = {
   entity: defaultValue,
   updating: false,
   updateSuccess: false,
+  totalPages: 0,
 };
 
 export type UserState = Readonly<typeof initialState>;
@@ -76,7 +70,8 @@ export default (state: UserState = initialState, action): UserState => {
       return {
         ...state,
         loading: false,
-        entities: action.payload.data,
+        entities: action.payload.data.content,
+        totalPages: action.payload.data.totalPages,
       };
     case SUCCESS(ACTION_TYPES.FETCH_USER):
       return {
@@ -91,7 +86,6 @@ export default (state: UserState = initialState, action): UserState => {
         ...state,
         updating: false,
         updateSuccess: true,
-        entity: action.payload.data,
       };
     case SUCCESS(ACTION_TYPES.DELETE_USER):
       return {
@@ -104,6 +98,10 @@ export default (state: UserState = initialState, action): UserState => {
       return {
         ...initialState,
       };
+    case ACTION_TYPES.RESET_SEARCH_USER:
+      return {
+        ...initialState,
+      };
     default:
       return state;
   }
@@ -111,13 +109,22 @@ export default (state: UserState = initialState, action): UserState => {
 
 // Actions
 
-export const getEntities: ICrudGetAllAction<IUser> = (page, size, sort) => ({
-  type: ACTION_TYPES.FETCH_USER_LIST,
-  payload: axios.get<IUser>(`${apiUrl}`),
-});
+export const buildURLQuery = (obj) =>
+  Object.entries(obj)
+    .filter((pair) => typeof pair[1] != 'undefined' && pair[1])
+    .map((pair) => pair.map(String).join('='))
+    .join('&');
+
+export const getEntities: ICrudGetAllActionBySearch<IUser> = (data, page, size, sort) => {
+  const requestUrl = `${apiUserUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&${buildURLQuery(data)}` : ''}`;
+  return {
+    type: ACTION_TYPES.FETCH_USER_LIST,
+    payload: axios.get<IUser>(requestUrl),
+  };
+};
 
 export const getEntity: ICrudGetAction<IUser> = (id) => {
-  const requestUrl = `${apiUrl}/${id}`;
+  const requestUrl = `${apiUserUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_USER,
     payload: axios.get<IUser>(requestUrl),
@@ -133,46 +140,48 @@ export const setEntity = (entity: IUser) => {
   };
 };
 
-export const createEntity: ICrudPutAction<IUser> =
-  (entity) => async (dispatch) => {
-    const result = await dispatch({
-      type: ACTION_TYPES.CREATE_USER,
-      payload: axios.post(apiUrl, cleanEntity(entity)),
-    });
-    dispatch(getEntities());
-    return result;
-  };
+export const createEntity: ICrudPutAction<IUser> = (entity) => async (dispatch) => {
+  const result = await dispatch({
+    type: ACTION_TYPES.CREATE_USER,
+    payload: axios.post(apiUserUrl, cleanEntity(entity)),
+  });
+  dispatch(reset());
+  return result;
+};
 
-export const updateEntity: ICrudPutAction<IUser> =
-  (entity) => async (dispatch) => {
-    const result = await dispatch({
-      type: ACTION_TYPES.UPDATE_USER,
-      payload: axios.put(`${apiUrl}/${entity?.id}`, cleanEntity(entity)),
-    });
-    dispatch(getEntities());
-    return result;
-  };
+export const updateEntity: ICrudPutAction<IUser> = (entity) => async (dispatch) => {
+  const result = await dispatch({
+    type: ACTION_TYPES.UPDATE_USER,
+    payload: axios.put(`${apiUserUrl}/${entity?.id}`, cleanEntity(entity)),
+  });
+  dispatch(reset());
+  return result;
+};
 
-export const partialUpdate: ICrudPutAction<IUser> =
-  (entity) => async (dispatch) => {
-    const result = await dispatch({
-      type: ACTION_TYPES.PARTIAL_UPDATE_USER,
-      payload: axios.patch(`${apiUrl}/${entity?.id}`, cleanEntity(entity)),
-    });
-    return result;
-  };
+export const partialUpdate: ICrudPutAction<IUser> = (entity) => async (dispatch) => {
+  const result = await dispatch({
+    type: ACTION_TYPES.PARTIAL_UPDATE_USER,
+    payload: axios.patch(`${apiUserUrl}/${entity?.id}`, cleanEntity(entity)),
+  });
+  return result;
+};
 
-export const deleteEntity: ICrudDeleteAction<IUser> =
-  (id) => async (dispatch) => {
-    const requestUrl = `${apiUrl}/${id}`;
-    const result = await dispatch({
-      type: ACTION_TYPES.DELETE_USER,
-      payload: axios.delete(requestUrl),
-    });
-    dispatch(getEntities());
-    return result;
-  };
+export const deleteEntity: ICrudDeleteAction<IUser> = (id) => async (dispatch) => {
+  const requestUrl = `${apiUserUrl}/${id}`;
+  const result = await dispatch({
+    type: ACTION_TYPES.DELETE_USER,
+    payload: axios.delete(requestUrl),
+  });
+  dispatch(getEntities());
+  return result;
+};
 
 export const reset = () => ({
   type: ACTION_TYPES.RESET,
 });
+
+export const resetSearch = () => (dispatch) => {
+  const result = dispatch(reset());
+  dispatch(getEntities());
+  return result;
+};
