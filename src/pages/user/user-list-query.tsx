@@ -73,7 +73,7 @@ type PaginationParam = {
   activePage: number;
 };
 
-const initialPagaination = {
+const initialPagination = {
   itemsPerPage: ITEMS_PER_PAGE,
   sort: 'id',
   order: 'desc',
@@ -102,7 +102,7 @@ const UserListQuery = (props: IUserProps) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string>('');
-  const [pagination, setPagination] = useState<PaginationParam>(initialPagaination);
+  const [pagination, setPagination] = useState<PaginationParam>(initialPagination);
   const [entity, setEntity] = useState<IUser>(props.userSearch);
 
   const { status, data, error, isFetching } = useQuery(['users', { entity }, { pagination }], fetchProjects, {

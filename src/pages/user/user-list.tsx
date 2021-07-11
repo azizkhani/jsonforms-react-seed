@@ -64,7 +64,7 @@ const useStyles = makeStyles((_theme) => ({
   },
 }));
 
-const initialPagaination = {
+const initialPagination = {
   itemsPerPage: ITEMS_PER_PAGE,
   sort: 'id',
   order: 'desc',
@@ -85,7 +85,7 @@ const UserList = (props: IUserProps) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState('');
-  const [pagination, setPagination] = useState(initialPagaination);
+  const [pagination, setPagination] = useState(initialPagination);
   const [entity, setEntity] = useState<IUser>(props.userSearch);
 
   useEffect(() => {
